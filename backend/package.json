@@ -1,0 +1,25 @@
+{
+  "name": "nbaccuracy_backend",
+  "version": "1.0.0",
+  "description": "backend for NBAccuracy hackathon project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iSDestiny/NBAccuracy.git"
+  },
+  "author": "Jason Bugallon, Kulraj Dhaliwal, Edgar Partida, Ray Yi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iSDestiny/NBAccuracy/issues"
+  },
+  "homepage": "https://github.com/iSDestiny/NBAccuracy#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.13"
+  }
+}
