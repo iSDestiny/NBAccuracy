@@ -1,6 +1,46 @@
 var request = require ('request');
 var express = require('express');
 const bodyParser = require('body-parser');
+var mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost/nba_app1");
+
+var userSchema = new mongoose.Schema({
+    username: String,
+    password: String,
+    email: String
+});
+
+var gameSchema = new mongoose.Schema({
+    date: Date,
+    team1: String,
+    team2: String,
+    user_id: mongoose.Schema.Types.ObjectId,
+    winner: String,
+    choice: String
+});
+
+var User = mongoose.model("User",userSchema);
+var Game = mongoose.model("Game",gameSchema);
+
+Game.find({}, function(err,game){
+    if (err){
+        console.log("oh no, error");
+        console.log(err);
+    } else{
+        console.log("All games");
+        console.log(game);
+    } 
+});
+
+User.find({}, function(err,user){
+    if (err){
+        console.log("oh no, error");
+        console.log(err);
+    } else{
+        console.log("All users ");
+        console.log(user);
+    } 
+});
 
 function parser(address){
     return new Promise(function(resolve, reject){
@@ -39,7 +79,7 @@ function get_date(todayBody){
 
 
 function id_to_team(id,teams){
-    var name = '';
+    var name = "";
     teams.forEach(function(t){
         if (t["teamId"] === id){
             name += t["fullName"];
@@ -61,13 +101,15 @@ function get_matches(scoreboardBody, teams){
 }
 
 var matches;
+var date;
 parser('http://data.nba.net/10s/prod/v2/2018/teams.json').then(function(val){
     var nba_teams=get_teams(val);
-    //console.log(nba_teams)
-    parser('http://data.nba.net/10s/prod/v1/20190217/scoreboard.json').then(function(m){
-        matches=get_matches(m,nba_teams);
-        //console.log(matches);
-
+    parser('http://data.nba.net/10s/prod/v1/today.json').then(function(val){
+        date = get_date(val);
+        parser('http://data.nba.net/10s/prod/v1/' + date + '/scoreboard.json').then(function(m){
+            matches=get_matches(m,nba_teams);
+            console.log(matches);
+        })
     })
 })
 
@@ -86,22 +128,33 @@ app.post('/login', function(req,res)
     //request.body.user.email;
 });
 
+app.post('/create_account', function(req,res)
+{
+    //add to database and sht;
+});
+
 app.get('/api/home', function(req, res)
 {
-    var games = '';
+    var count = 0;
+    var games = [];
     for (var i = 0; i < matches.length; i++)
     {
+        var jsonsht = {};
+        var team = [];
         if (matches[i][0] === "")
         {
-            games = 1;
+            games.push("No Matches");
+        }
+        else{
+            team.push(matches[i][0]);
+            team.push(matches[i][1]);
+            games.push({'teams': JSON.stringify(team), 'date': date});
+            //jsonsht['teams'] = team;
+            //jsonsht['date'] = date;
+            //games.push(JSON.stringify(jsonsht));
         }
     }
-    if (games != 1){
-        games = [{teams: matches, date: date}];
-    }
-    else{
-        games = ["No matches"];
-    }
+    res.contentType('application/json');
     res.send(JSON.stringify(games));
 });
 
